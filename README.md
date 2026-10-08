@@ -49,7 +49,7 @@ Tested on an iPhone 18 Pro Max (A20 Pro, 12 GB) with the Steam build v1.143476, 
 | Thermals | Reaches the "fair" state after about 7 minutes at 120 fps (no throttling). 90 fps is a one-setting change. |
 | Input | MFi/Bluetooth/USB-C controllers via the game's SDL path, plus an on-screen gamepad fallback |
 | Audio | FMOD (the game's own macOS build) through a HAL emulation layer on RemoteIO |
-| Not working | Steam/Epic online features: achievements, cloud saves (stubbed out, saves are local) |
+| Not working | Steam/Epic online features: achievements, cloud saves (the stubs report the services as unavailable, so saves are local) |
 | Known issue | 0.2–0.4 s hitches when a new room streams its assets |
 
 ## Requirements
@@ -124,7 +124,7 @@ The short version:
    rewritten, never removed, so symbol bindings stay valid.
 2. **Shim what's missing.** The AppKit shim implements `NSApplication`/`NSWindow`/`NSView`/`NSScreen`
    on top of UIKit. The other shims cover CoreGraphics display modes, the CoreAudio HAL, SwiftUI's
-   macOS-only types, and offline Steam/EOS/Backtrace stubs. SDL 2.32.10 (the same version the game
+   macOS-only types, and Steam/EOS/Backtrace stubs that report those services as unavailable. SDL 2.32.10 (the same version the game
    ships) is rebuilt for iOS with two small patches.
 3. **Patch at runtime.** The shims also fix up macOS-only Metal usage, redirect the game's content
    path to the Documents folder, report memory figures that steer the game onto its

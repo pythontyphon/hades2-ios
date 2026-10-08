@@ -14,7 +14,7 @@ The Steam build (`Hades II.app`, v1.143476) is arm64 only, built with the macOS 
 | `SDL2.framework` 2.32.10 | Controller input | **Rebuilt from source for iOS**, same version |
 | `libfmod` / `libfmodstudio` | Audio | Retagged; CoreAudio HAL emulated |
 | `libBink2MacArm64` | Video | Retagged (with a `__LINKEDIT` fix, see §4) |
-| `libsteam_api`, `libsdkencryptedappticket` | Steam | Replaced by offline stubs |
+| `libsteam_api`, `libsdkencryptedappticket` | Steam | Replaced by a "no Steam client" stub / an empty library |
 | `libEOSSDK-Mac-Shipping` | Epic Online Services | Replaced by a stub (platform create returns NULL) |
 | `Backtrace.framework` | Crash reporting | Replaced by catch-all stub classes |
 
@@ -92,7 +92,7 @@ The Forge's macOS layer subclasses AppKit: `ForgeApplication : NSApplication`,
 | `SwiftUIMac` | Traps if the macOS-only bug-reporter UI is ever reached |
 | `CoreServicesMac` | `LSOpenCFURLRef` → `UIApplication openURL:` |
 | `Carbon` | Empty: satisfies load commands with zero imports |
-| `stubs/steam_api` | `SteamAPI_Init` succeeds offline. Every interface is a fake C++ object whose vtable returns 0 |
+| `stubs/steam_api` | Behaves like the real library with no Steam client running: `SteamAPI_Init` returns `NoSteamClient`, and every interface lookup returns NULL. Nothing is faked: in testing the game never called `SteamAPI_Init`, never calls `SteamAPI_RestartAppIfNecessary`, and never uses the encrypted-ticket library. It only asks lazily for the optional timeline interface and carries on without it |
 | `stubs/EOSSDK` | `EOS_Platform_Create` returns NULL, so the game treats Epic services as unavailable |
 | `stubs/Backtrace` | Catch-all classes under the Swift classes' runtime names |
 

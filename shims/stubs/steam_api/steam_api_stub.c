@@ -1,56 +1,50 @@
-// Offline replacement for libsteam_api.dylib. SteamAPI init "succeeds" and every interface the
-// game asks for is a fake C++ object whose vtable slots all return 0 (not logged in, no
-// achievements, no cloud), so the game runs as if Steam were present but offline.
+// Replacement for libsteam_api.dylib that behaves like the real library when no Steam client is
+// running: SteamAPI_Init reports k_ESteamAPIInitResult_NoSteamClient and every interface lookup
+// returns NULL. Nothing is faked or bypassed; the game simply runs with Steam features unavailable
+// (it does not require Steam on macOS: it never calls SteamAPI_RestartAppIfNecessary).
 #include <stdint.h>
-#include <string.h>
+#include <stddef.h>
 #include "../../common/shimlog.h"
 
 typedef int32_t HSteamUser;
 typedef int32_t HSteamPipe;
 
-static uint64_t ReturnZero(void) { return 0; }
+enum { k_ESteamAPIInitResult_NoSteamClient = 2 };
 
-#define VTABLE_SLOTS 512
-static void *g_vtable[VTABLE_SLOTS];
-static struct { void **vtbl; } g_iface = { g_vtable };
-static uintptr_t g_init_counter = 1;
-
-__attribute__((constructor)) static void InitVtable(void)
-{
-    for (int i = 0; i < VTABLE_SLOTS; i++) g_vtable[i] = (void *)ReturnZero;
-}
-
-// ESteamAPIInitResult: 0 = OK
 int SteamInternal_SteamAPI_Init(const char *versions, char *outErrMsg)
 {
-    SHIM_LOG("steam_api stub: SteamAPI_Init -> OK (offline)");
-    if (outErrMsg) outErrMsg[0] = 0;
-    return 0;
+    SHIM_LOG("steam_api: no Steam client on iOS - SteamAPI_Init -> NoSteamClient");
+    if (outErrMsg) {
+        static const char msg[] = "Steam is not running";
+        for (size_t i = 0; i < sizeof msg; i++) outErrMsg[i] = msg[i];
+    }
+    return k_ESteamAPIInitResult_NoSteamClient;
 }
 
 void SteamAPI_Shutdown(void) {}
 void SteamAPI_RunCallbacks(void) {}
 void SteamAPI_RegisterCallback(void *cb, int id) {}
 void SteamAPI_UnregisterCallback(void *cb) {}
-HSteamUser SteamAPI_GetHSteamUser(void) { return 1; }
-HSteamPipe SteamAPI_GetHSteamPipe(void) { return 1; }
+HSteamUser SteamAPI_GetHSteamUser(void) { return 0; }
+HSteamPipe SteamAPI_GetHSteamPipe(void) { return 0; }
 int SteamAPI_RestartAppIfNecessary(uint32_t appid) { return 0; }
 
 void *SteamInternal_FindOrCreateUserInterface(HSteamUser user, const char *version)
 {
-    SHIM_LOG("steam_api stub: interface %s", version ? version : "?");
-    return &g_iface;
+    SHIM_LOG("steam_api: interface %s requested without Steam -> NULL", version ? version : "?");
+    return NULL;
 }
 
-void *SteamInternal_FindOrCreateGameServerInterface(HSteamUser user, const char *version) { return &g_iface; }
+void *SteamInternal_FindOrCreateGameServerInterface(HSteamUser user, const char *version) { return NULL; }
 
-// Mirrors steam_api_internal.h: struct { void (*init)(void *ctx); uintptr_t counter; ctx storage... }
+// Mirrors steam_api_internal.h: struct { void (*init)(void *ctx); uintptr_t counter; ctx storage... }.
+// Without Steam the real library runs the init callback once; the interface pointers it fills are NULL.
 void *SteamInternal_ContextInit(void *pContextInitData)
 {
     struct Ctx { void (*init)(void *); uintptr_t counter; char ctx[]; } *c = pContextInitData;
-    if (c->counter != g_init_counter) {
+    if (c->counter != 1) {
         c->init(c->ctx);
-        c->counter = g_init_counter;
+        c->counter = 1;
     }
     return c->ctx;
 }
