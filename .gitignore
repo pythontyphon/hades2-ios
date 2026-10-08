@@ -1,0 +1,25 @@
+# Personal settings (team ID, bundle ID, device UDID)
+local.env
+
+# Everything derived from the game lives here: staged/ported Supergiant binaries, converted shaders,
+# the content mirror, disassembly, logs, Xcode output. Never commit it.
+build/
+
+# Generated from the user's own copy of the game at build time (Supergiant artwork / binary metadata)
+app/Assets.xcassets/AppIcon.appiconset/*.png
+shims/GAP_REPORT.md
+shims/gap/
+
+# Downloaded at build time
+third_party/SDL2-*/
+
+# Tooling
+tools/venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.ipa
+xcuserdata/
+
+# The original task prompt for this port
+instructions.md

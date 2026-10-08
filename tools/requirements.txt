@@ -1,0 +1,2 @@
+pillow
+pymobiledevice3   # optional: `pymobiledevice3 syslog live` for device logs without sudo
