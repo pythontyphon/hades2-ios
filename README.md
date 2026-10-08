@@ -10,6 +10,33 @@ renders through Metal.
 > from *your own* legally obtained copy of the game, and the result is for personal use on your
 > own device. Don't share the resulting app, IPA, or anything in `build/`.
 
+## Read this first: you're on your own, so bring an agent
+
+**This is provided as is, with no support. Any problem you run into is yours to solve.** That
+includes problems with your device, your Apple developer account, your game install and your save
+files. It was built and tested on exactly one setup (below). Issues and pull requests may go
+unanswered.
+
+Your setup **will** differ: a different iPhone (and RAM limit), iOS or Xcode version, Apple account
+type, or a game version after a Steam update. Expect at least one thing to break. A port like this
+fails in ways that depend on the exact binaries and OS, such as a missing symbol, a new watchdog,
+a memory limit or a changed shader format.
+
+**You'll have a much better experience pointing a coding agent (e.g. Claude Code) at this repo on
+your Mac than hoping it works out of the box.** The repo is set up for that:
+- `docs/HOW_IT_WORKS.md` records every failure met so far, with its diagnosis and fix.
+- The tools give an agent what it needs to investigate on its own:
+  - an offline import gap report and dyld bind check
+  - on-device session logs with fps/memory telemetry
+  - a crash-report fetcher
+  - instructions for reading the device syslog
+
+A good starting prompt:
+
+> Read README.md and docs/HOW_IT_WORKS.md, then port my Steam copy of Hades II to my iPhone with
+> this repo. Run tools/build_all.sh, fix whatever breaks on my setup, and diagnose any on-device
+> crash from the session logs, crash reports and device syslog before changing code.
+
 ## Results
 
 Tested on an iPhone 18 Pro Max (A20 Pro, 12 GB) with the Steam build v1.143476, iOS 27, and Xcode 27:
@@ -119,7 +146,15 @@ docs/         how it works
 build/        (git-ignored) everything derived from the game
 ```
 
-## Legal
+## License and legal
+
+The code in this repository is MIT-licensed (see [LICENSE](LICENSE)). That covers only the
+original shims, scripts and docs here. It grants no rights to Hades II or any other third-party
+software.
+
+**Use at your own risk.** You're responsible for what you build and run with this, and for
+complying with the terms that apply to you (e.g. the game's EULA, Steam's subscriber agreement,
+Apple's developer program agreement).
 
 Hades II is © Supergiant Games, LLC. This project is unaffiliated with and not endorsed by
 Supergiant Games, Valve, Epic Games, Firelight Technologies (FMOD), Epic Games Tools (Bink), or
